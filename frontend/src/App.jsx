@@ -1,9 +1,18 @@
 import { useState, useRef, useEffect } from "react";
 import "./App.css";
 
-const API_URL = window.location.port === "8000"
-  ? window.location.origin
-  : import.meta.env.VITE_API_URL || window.location.origin;
+// Remove a trailing "/" so requests never go to a double-slash URL like "//chat"
+const API_URL = (
+  window.location.port === "8000"
+    ? window.location.origin
+    : import.meta.env.VITE_API_URL || window.location.origin
+).replace(/\/$/, "");
+
+const STATUS_LABELS = {
+  waking: "WAKING UP…",
+  online: "ONLINE",
+  offline: "OFFLINE",
+};
 
 function App() {
   const [conversationId] = useState(() => {
@@ -30,6 +39,11 @@ function App() {
   const [recording, setRecording] = useState(false);
   const [transcribing, setTranscribing] = useState(false);
   const [voiceError, setVoiceError] = useState("");
+
+  // "waking" until the backend answers, then "online" or "offline"
+  const [serverStatus, setServerStatus] = useState("waking");
+  // The backend tells us whether voice is transcribed "local"ly or by "groq"
+  const [transcribeWith, setTranscribeWith] = useState("local");
 
   // Reference to the actual chat container
   const chatAreaRef = useRef(null);
@@ -61,6 +75,48 @@ function App() {
       behavior: "smooth",
     });
   }, [messages, loading]);
+
+
+  // ============================================================
+  // WAKE UP THE BACKEND
+  // Free Render servers sleep when unused and take about a
+  // minute to start. Asking /health as soon as the page opens
+  // starts that while the user is still reading or typing.
+  // ============================================================
+
+  useEffect(() => {
+    let cancelled = false;
+    let retryTimer;
+    const startedAt = Date.now();
+
+    const checkServer = async () => {
+      try {
+        const response = await fetch(`${API_URL}/health`);
+        if (!response.ok) throw new Error(`Server returned ${response.status}`);
+        const data = await response.json();
+
+        if (cancelled) return;
+        setServerStatus("online");
+        if (data.transcribe_with) setTranscribeWith(data.transcribe_with);
+      } catch {
+        if (cancelled) return;
+
+        // Still asleep: try again every 5 seconds, for up to 2 minutes
+        if (Date.now() - startedAt < 120000) {
+          retryTimer = setTimeout(checkServer, 5000);
+        } else {
+          setServerStatus("offline");
+        }
+      }
+    };
+
+    checkServer();
+
+    return () => {
+      cancelled = true;
+      clearTimeout(retryTimer);
+    };
+  }, []);
 
 
   // ============================================================
@@ -105,6 +161,7 @@ function App() {
       }
 
       const data = await response.json();
+      setServerStatus("online");
 
       setMessages((previous) => [
         ...previous,
@@ -295,11 +352,11 @@ function App() {
 
               <h1>JARVIS</h1>
 
-              <div className="status">
+              <div className={`status status-${serverStatus}`}>
 
                 <span className="status-dot"></span>
 
-                ONLINE
+                {STATUS_LABELS[serverStatus]}
 
               </div>
 
@@ -447,7 +504,13 @@ function App() {
               onClick={toggleRecording}
               disabled={loading || transcribing}
               aria-label={recording ? "Stop recording" : "Start voice input"}
-              title={recording ? "Stop and transcribe" : "Speak to JARVIS (processed locally)"}
+              title={
+                recording
+                  ? "Stop and transcribe"
+                  : transcribeWith === "local"
+                    ? "Speak to JARVIS (processed locally)"
+                    : "Speak to JARVIS"
+              }
             >
               {recording ? "■" : "🎙"}
             </button>
@@ -471,7 +534,11 @@ function App() {
           </p>
           {(recording || transcribing) && (
             <p className="voice-status" role="status">
-              {recording ? "Listening — press stop when finished." : "Transcribing locally… first use may take longer while the model downloads."}
+              {recording
+                ? "Listening — press stop when finished."
+                : transcribeWith === "local"
+                  ? "Transcribing locally… first use may take longer while the model downloads."
+                  : "Transcribing…"}
             </p>
           )}
           {voiceError && <p className="voice-error" role="alert">{voiceError}</p>}

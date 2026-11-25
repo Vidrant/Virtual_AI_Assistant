@@ -16,7 +16,6 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
-from faster_whisper import WhisperModel
 
 
 # ============================================================
@@ -89,8 +88,23 @@ class ClearRequest(BaseModel):
     conversation_id: str
 
 
+# ============================================================
+# SPEECH-TO-TEXT SETTINGS
+# ============================================================
+
+# "local" = faster-whisper on this computer (private, works offline)
+# "groq"  = Groq's Whisper API (for small online servers like Render)
+TRANSCRIBE_WITH = os.getenv("TRANSCRIBE_WITH", "local").strip().lower()
+
+if TRANSCRIBE_WITH not in ("local", "groq"):
+    raise ValueError(
+        "TRANSCRIBE_WITH must be 'local' or 'groq', "
+        f"but it is '{TRANSCRIBE_WITH}'."
+    )
+
 MAX_AUDIO_BYTES = 20 * 1024 * 1024
 WHISPER_MODEL_NAME = os.getenv("WHISPER_MODEL", "tiny.en")
+GROQ_WHISPER_MODEL = "whisper-large-v3-turbo"
 SUPPORTED_AUDIO_EXTENSIONS = {
     ".flac", ".mp3", ".mp4", ".mpeg", ".mpga", ".m4a", ".ogg", ".wav", ".webm"
 }
@@ -98,12 +112,36 @@ SUPPORTED_AUDIO_EXTENSIONS = {
 
 @lru_cache(maxsize=1)
 def get_whisper_model():
+    # Imported here instead of at the top of the file, so the online
+    # server (which uses Groq) doesn't need faster-whisper installed.
+    from faster_whisper import WhisperModel
+
     # The model downloads once on first use, then loads from the local cache.
     return WhisperModel(
         WHISPER_MODEL_NAME,
         device="cpu",
         compute_type="int8",
     )
+
+
+def transcribe_locally(audio_bytes):
+    segments, _info = get_whisper_model().transcribe(
+        io.BytesIO(audio_bytes),
+        beam_size=1,
+        vad_filter=True,
+    )
+    return " ".join(segment.text.strip() for segment in segments).strip()
+
+
+def transcribe_with_groq(audio_bytes, filename):
+    # Groq uses the filename's extension (.webm, .wav, ...) to read the audio
+    transcription = client.audio.transcriptions.create(
+        file=(filename, audio_bytes),
+        model=GROQ_WHISPER_MODEL,
+        language="en",
+        temperature=0.0,
+    )
+    return transcription.text.strip()
 
 
 @app.post("/transcribe")
@@ -120,15 +158,14 @@ async def transcribe_audio(audio: UploadFile = File(...)):
         raise HTTPException(status_code=413, detail="Keep recordings under 20 MB.")
 
     try:
-        segments, _info = get_whisper_model().transcribe(
-            io.BytesIO(audio_bytes),
-            beam_size=1,
-            vad_filter=True,
-        )
-        transcript = " ".join(segment.text.strip() for segment in segments).strip()
+        if TRANSCRIBE_WITH == "groq":
+            transcript = transcribe_with_groq(audio_bytes, filename)
+        else:
+            transcript = transcribe_locally(audio_bytes)
+
         return {"text": transcript}
     except Exception as error:
-        print("LOCAL TRANSCRIPTION ERROR:", error)
+        print(f"TRANSCRIPTION ERROR ({TRANSCRIBE_WITH}):", error)
         raise HTTPException(
             status_code=422,
             detail="Could not transcribe this recording. Try recording again.",
@@ -814,7 +851,8 @@ async def root():
 async def health():
 
     return {
-        "status": "healthy"
+        "status": "healthy",
+        "transcribe_with": TRANSCRIBE_WITH
     }
 
 

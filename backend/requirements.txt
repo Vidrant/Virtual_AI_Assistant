@@ -1,8 +1,9 @@
-fastapi
-uvicorn[standard]
-python-dotenv
-groq
-faster-whisper
-# faster-whisper 1.2.1 still passes metadata_errors to av.open; PyAV 19 removed it.
-av<19
-python-multipart
+# Packages the online server (Render) needs.
+# Exact versions that are tested and working, so every install matches.
+# Running on your own PC? start_jarvis.bat installs requirements-local.txt,
+# which adds local Whisper on top of these.
+fastapi==0.162.0
+uvicorn[standard]==0.54.0
+python-dotenv==1.2.4
+groq==1.7.0
+python-multipart==0.0.32

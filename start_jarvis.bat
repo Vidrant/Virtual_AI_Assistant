@@ -22,7 +22,7 @@ if errorlevel 1 (
   exit /b 1
 )
 call backend\.venv\Scripts\activate.bat
-python -m pip install -r backend\requirements.txt
+python -m pip install -r backend\requirements-local.txt
 if errorlevel 1 goto failed
 
 if not exist "frontend\node_modules" call npm --prefix frontend install
