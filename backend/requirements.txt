@@ -1,0 +1,8 @@
+fastapi
+uvicorn[standard]
+python-dotenv
+groq
+faster-whisper
+# faster-whisper 1.2.1 still passes metadata_errors to av.open; PyAV 19 removed it.
+av<19
+python-multipart

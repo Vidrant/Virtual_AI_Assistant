@@ -1,0 +1,1011 @@
+/* ============================================================
+   GLOBAL
+   ============================================================ */
+
+* {
+  box-sizing: border-box;
+}
+
+html,
+body,
+#root {
+  width: 100%;
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  background: #05070d;
+}
+
+body {
+  font-family:
+    Inter,
+    system-ui,
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+
+  background: #05070d;
+  color: #f5f7ff;
+
+  overflow: hidden;
+}
+
+button,
+textarea {
+  font-family: inherit;
+}
+
+button {
+  cursor: pointer;
+}
+
+
+/* ============================================================
+   APP
+   ============================================================ */
+
+.app {
+  width: 100%;
+  height: 100vh;
+  height: 100dvh;
+
+  min-height: 0;
+
+  display: flex;
+
+  /*
+    IMPORTANT:
+    Keep the application at the top of the viewport.
+    This prevents the header from being pushed above
+    the visible screen.
+  */
+  align-items: flex-start;
+  justify-content: center;
+
+  padding: 10px 16px;
+
+  background:
+    radial-gradient(
+      circle at top left,
+      rgba(0, 153, 255, 0.12),
+      transparent 35%
+    ),
+    radial-gradient(
+      circle at bottom right,
+      rgba(0, 255, 200, 0.08),
+      transparent 35%
+    ),
+    #05070d;
+
+  position: relative;
+
+  overflow: hidden;
+}
+
+
+/* ============================================================
+   BACKGROUND GLOW
+   ============================================================ */
+
+.background-glow {
+  position: absolute;
+
+  width: 300px;
+  height: 300px;
+
+  border-radius: 50%;
+
+  filter: blur(120px);
+
+  pointer-events: none;
+}
+
+.glow-one {
+  background: rgba(0, 153, 255, 0.08);
+
+  top: -100px;
+  left: -100px;
+}
+
+.glow-two {
+  background: rgba(0, 255, 200, 0.06);
+
+  bottom: -100px;
+  right: -100px;
+}
+
+
+/* ============================================================
+   MAIN JARVIS CONTAINER
+   ============================================================ */
+
+.jarvis-container {
+  width: 100%;
+  max-width: 1000px;
+
+  /*
+    The container always stays inside the viewport.
+  */
+  height: calc(100vh - 20px);
+  height: calc(100dvh - 20px);
+
+  min-height: 0;
+  max-height: calc(100dvh - 20px);
+
+  display: flex;
+  flex-direction: column;
+
+  background: rgba(10, 14, 24, 0.96);
+
+  border: 1px solid rgba(255, 255, 255, 0.08);
+
+  border-radius: 24px;
+
+  overflow: hidden;
+
+  box-shadow:
+    0 30px 80px rgba(0, 0, 0, 0.45);
+
+  backdrop-filter: blur(20px);
+
+  position: relative;
+
+  z-index: 1;
+
+  flex-shrink: 0;
+}
+
+
+/* ============================================================
+   HEADER
+   ============================================================ */
+
+.header {
+  height: 78px;
+  min-height: 78px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+
+  padding: 0 24px;
+
+  border-bottom: 1px solid
+    rgba(255, 255, 255, 0.07);
+
+  position: relative;
+
+  z-index: 5;
+}
+
+.brand {
+  display: flex;
+  align-items: center;
+
+  gap: 12px;
+
+  flex-shrink: 0;
+}
+
+.jarvis-logo {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 12px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1677ff,
+      #00d4ff
+    );
+
+  font-weight: 800;
+  font-size: 20px;
+
+  box-shadow:
+    0 0 25px rgba(0, 170, 255, 0.25);
+}
+
+.brand h1 {
+  margin: 0;
+
+  font-size: 18px;
+
+  line-height: 1.2;
+
+  letter-spacing: 3px;
+
+  color: #f5f7ff;
+}
+
+.status {
+  margin-top: 3px;
+
+  display: flex;
+  align-items: center;
+
+  gap: 6px;
+
+  font-size: 10px;
+
+  line-height: 1;
+
+  color: #7e8ba5;
+
+  letter-spacing: 1.5px;
+}
+
+.status-dot {
+  width: 6px;
+  height: 6px;
+
+  flex-shrink: 0;
+
+  border-radius: 50%;
+
+  background: #35e69b;
+
+  box-shadow:
+    0 0 10px rgba(53, 230, 155, 0.8);
+}
+
+.clear-button {
+  flex-shrink: 0;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+
+  background: rgba(255, 255, 255, 0.03);
+
+  color: #9da8bc;
+
+  padding: 8px 14px;
+
+  border-radius: 9px;
+
+  transition: 0.2s;
+}
+
+.clear-button:hover {
+  background: rgba(255, 255, 255, 0.08);
+
+  color: white;
+}
+
+
+/* ============================================================
+   CHAT
+   ============================================================ */
+
+.chat-area {
+  flex: 1;
+
+  min-height: 0;
+
+  overflow-y: auto;
+  overflow-x: hidden;
+
+  padding: 30px;
+
+  display: flex;
+  flex-direction: column;
+
+  gap: 20px;
+
+  /*
+    Allows this section to shrink instead of
+    pushing the header/input outside the viewport.
+  */
+  overscroll-behavior: contain;
+}
+
+.chat-area::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chat-area::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.chat-area::-webkit-scrollbar-thumb {
+  background: #252d3d;
+
+  border-radius: 10px;
+}
+
+
+/* ============================================================
+   MESSAGE
+   ============================================================ */
+
+.message-row {
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 10px;
+
+  max-width: 80%;
+
+  flex-shrink: 0;
+}
+
+.assistant-row {
+  align-self: flex-start;
+}
+
+.user-row {
+  align-self: flex-end;
+
+  flex-direction: row-reverse;
+}
+
+.speak-button {
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.04);
+  color: #8dbaff;
+}
+
+.speak-button:hover {
+  background: rgba(20, 110, 220, 0.18);
+}
+
+.avatar {
+  width: 30px;
+  height: 30px;
+
+  flex-shrink: 0;
+
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  border-radius: 50%;
+
+  font-size: 12px;
+  font-weight: 700;
+}
+
+.assistant-avatar {
+  background: #101d32;
+
+  color: #48bfff;
+
+  border: 1px solid
+    rgba(72, 191, 255, 0.2);
+}
+
+.message {
+  padding: 13px 16px;
+
+  border-radius: 16px;
+
+  line-height: 1.55;
+
+  font-size: 14px;
+
+  white-space: pre-wrap;
+
+  word-break: break-word;
+}
+
+.assistant-message {
+  background: #111725;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.06);
+
+  border-bottom-left-radius: 4px;
+
+  color: #dce3f2;
+}
+
+.user-message {
+  background:
+    linear-gradient(
+      135deg,
+      #1468d9,
+      #0755b8
+    );
+
+  color: white;
+
+  border-bottom-right-radius: 4px;
+
+  box-shadow:
+    0 5px 20px
+    rgba(0, 100, 220, 0.15);
+}
+
+
+/* ============================================================
+   TYPING INDICATOR
+   ============================================================ */
+
+.typing {
+  display: flex;
+
+  align-items: center;
+
+  gap: 4px;
+
+  min-width: 60px;
+}
+
+.typing span {
+  width: 6px;
+  height: 6px;
+
+  border-radius: 50%;
+
+  background: #6e7b94;
+
+  animation: typing 1.2s infinite;
+}
+
+.typing span:nth-child(2) {
+  animation-delay: 0.15s;
+}
+
+.typing span:nth-child(3) {
+  animation-delay: 0.3s;
+}
+
+@keyframes typing {
+
+  0%,
+  60%,
+  100% {
+    transform: translateY(0);
+    opacity: 0.4;
+  }
+
+  30% {
+    transform: translateY(-4px);
+    opacity: 1;
+  }
+}
+
+
+/* ============================================================
+   QUICK ACTIONS
+   ============================================================ */
+
+.quick-actions {
+  flex-shrink: 0;
+
+  display: flex;
+
+  gap: 8px;
+
+  padding: 0 24px 12px;
+
+  overflow-x: auto;
+
+  overflow-y: hidden;
+}
+
+.quick-actions::-webkit-scrollbar {
+  height: 0;
+}
+
+.quick-actions button {
+  flex-shrink: 0;
+
+  background: rgba(255, 255, 255, 0.035);
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+
+  color: #9ba7bd;
+
+  border-radius: 20px;
+
+  padding: 8px 13px;
+
+  font-size: 12px;
+
+  white-space: nowrap;
+
+  transition: 0.2s;
+}
+
+.quick-actions button:hover {
+  background: rgba(20, 110, 220, 0.15);
+
+  border-color:
+    rgba(40, 150, 255, 0.3);
+
+  color: #dcecff;
+}
+
+.quick-actions button:disabled {
+  opacity: 0.5;
+
+  cursor: not-allowed;
+}
+
+
+/* ============================================================
+   INPUT
+   ============================================================ */
+
+.input-section {
+  flex-shrink: 0;
+
+  padding: 16px 24px 20px;
+
+  border-top: 1px solid
+    rgba(255, 255, 255, 0.07);
+}
+
+.input-container {
+  display: flex;
+
+  align-items: flex-end;
+
+  gap: 10px;
+
+  background: #0c111d;
+
+  border: 1px solid
+    rgba(255, 255, 255, 0.08);
+
+  border-radius: 14px;
+
+  padding: 8px;
+
+  transition: 0.2s;
+}
+
+.input-container:focus-within {
+  border-color:
+    rgba(40, 150, 255, 0.4);
+
+  box-shadow:
+    0 0 0 3px
+    rgba(40, 150, 255, 0.05);
+}
+
+textarea {
+  flex: 1;
+
+  min-width: 0;
+
+  resize: none;
+
+  min-height: 42px;
+  max-height: 120px;
+
+  padding: 11px;
+
+  background: transparent;
+
+  border: none;
+
+  outline: none;
+
+  color: white;
+
+  font-size: 14px;
+
+  line-height: 1.5;
+}
+
+textarea::placeholder {
+  color: #59657a;
+}
+
+.send-button {
+  width: 42px;
+  height: 42px;
+
+  flex-shrink: 0;
+
+  border: none;
+
+  border-radius: 11px;
+
+  background:
+    linear-gradient(
+      135deg,
+      #1677ff,
+      #00aeea
+    );
+
+  color: white;
+
+  font-size: 18px;
+
+  transition: 0.2s;
+}
+
+.mic-button {
+  width: 42px;
+  height: 42px;
+  flex-shrink: 0;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 11px;
+  background: rgba(255, 255, 255, 0.05);
+  color: #c5d5ee;
+  font-size: 17px;
+}
+
+.mic-button:hover:not(:disabled) {
+  background: rgba(20, 110, 220, 0.18);
+}
+
+.mic-button.is-recording {
+  color: #ff7c86;
+  background: rgba(210, 50, 65, 0.16);
+  animation: pulse-recording 1s infinite alternate;
+}
+
+.mic-button:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+@keyframes pulse-recording {
+  to { box-shadow: 0 0 0 5px rgba(255, 90, 105, 0.1); }
+}
+
+.send-button:hover:not(:disabled) {
+  transform: translateY(-1px);
+
+  box-shadow:
+    0 5px 20px
+    rgba(0, 150, 255, 0.25);
+}
+
+.send-button:disabled {
+  opacity: 0.35;
+
+  cursor: not-allowed;
+}
+
+.input-hint {
+  margin: 8px 2px 0;
+
+  color: #4e5a70;
+
+  font-size: 10px;
+
+  text-align: center;
+}
+
+.voice-status,
+.voice-error {
+  margin: 7px 2px 0;
+  font-size: 11px;
+  text-align: center;
+}
+
+.voice-status { color: #79caff; }
+.voice-error { color: #ff9aa2; }
+
+
+/* ============================================================
+   SHORT LAPTOP SCREEN
+   ============================================================ */
+
+@media (max-height: 750px) {
+
+  .app {
+    padding: 6px 10px;
+  }
+
+  .jarvis-container {
+    height: calc(100dvh - 12px);
+
+    max-height: calc(100dvh - 12px);
+
+    border-radius: 20px;
+  }
+
+  .header {
+    height: 66px;
+    min-height: 66px;
+
+    padding: 0 20px;
+  }
+
+  .jarvis-logo {
+    width: 38px;
+    height: 38px;
+
+    font-size: 18px;
+  }
+
+  .brand h1 {
+    font-size: 17px;
+  }
+
+  .chat-area {
+    padding: 18px 20px;
+
+    gap: 12px;
+  }
+
+  .message {
+    padding: 10px 13px;
+
+    font-size: 13px;
+  }
+
+  .quick-actions {
+    padding:
+      0 20px
+      8px;
+  }
+
+  .quick-actions button {
+    padding: 6px 10px;
+
+    font-size: 11px;
+  }
+
+  .input-section {
+    padding:
+      10px 20px
+      12px;
+  }
+
+  .input-hint {
+    margin-top: 4px;
+  }
+}
+
+
+/* ============================================================
+   VERY SHORT SCREEN
+   ============================================================ */
+
+@media (max-height: 650px) {
+
+  .app {
+    padding: 4px 6px;
+  }
+
+  .jarvis-container {
+    height: calc(100dvh - 8px);
+
+    max-height: calc(100dvh - 8px);
+
+    border-radius: 16px;
+  }
+
+  .header {
+    height: 58px;
+    min-height: 58px;
+
+    padding: 0 16px;
+  }
+
+  .jarvis-logo {
+    width: 34px;
+    height: 34px;
+
+    font-size: 16px;
+
+    border-radius: 9px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand h1 {
+    font-size: 15px;
+
+    letter-spacing: 2px;
+  }
+
+  .status {
+    font-size: 8px;
+  }
+
+  .clear-button {
+    padding: 6px 10px;
+
+    font-size: 11px;
+  }
+
+  .chat-area {
+    padding: 12px 16px;
+
+    gap: 8px;
+  }
+
+  .message-row {
+    max-width: 85%;
+  }
+
+  .avatar {
+    width: 25px;
+    height: 25px;
+
+    font-size: 9px;
+  }
+
+  .message {
+    padding: 7px 10px;
+
+    font-size: 11px;
+
+    line-height: 1.35;
+  }
+
+  .quick-actions {
+    padding:
+      0 16px
+      5px;
+
+    gap: 5px;
+  }
+
+  .quick-actions button {
+    padding: 5px 8px;
+
+    font-size: 9px;
+  }
+
+  .input-section {
+    padding:
+      6px 16px
+      8px;
+  }
+
+  .input-container {
+    padding: 5px;
+
+    gap: 5px;
+  }
+
+  textarea {
+    min-height: 34px;
+
+    padding: 7px;
+
+    font-size: 11px;
+  }
+
+  .send-button {
+    width: 34px;
+    height: 34px;
+
+    font-size: 14px;
+  }
+
+  .mic-button {
+    width: 34px;
+    height: 34px;
+    font-size: 14px;
+  }
+
+  .input-hint {
+    display: none;
+  }
+}
+
+
+/* ============================================================
+   MOBILE
+   ============================================================ */
+
+@media (max-width: 700px) {
+
+  .app {
+    padding: 0;
+  }
+
+  .jarvis-container {
+    width: 100%;
+    height: 100dvh;
+
+    max-height: none;
+
+    border-radius: 0;
+
+    border: none;
+  }
+
+  .header {
+    height: 68px;
+    min-height: 68px;
+
+    padding: 0 15px;
+  }
+
+  .jarvis-logo {
+    width: 38px;
+    height: 38px;
+  }
+
+  .brand h1 {
+    font-size: 16px;
+  }
+
+  .chat-area {
+    padding: 20px 15px;
+
+    gap: 14px;
+  }
+
+  .message-row {
+    max-width: 90%;
+  }
+
+  .message {
+    font-size: 13px;
+  }
+
+  .input-section {
+    padding:
+      12px 15px
+      15px;
+  }
+
+  .quick-actions {
+    padding-left: 15px;
+    padding-right: 15px;
+  }
+}
+
+
+/* ============================================================
+   SMALL MOBILE
+   ============================================================ */
+
+@media (max-width: 400px) {
+
+  .header {
+    padding: 0 12px;
+  }
+
+  .brand {
+    gap: 8px;
+  }
+
+  .brand h1 {
+    font-size: 15px;
+  }
+
+  .clear-button {
+    padding: 6px 9px;
+
+    font-size: 10px;
+  }
+
+  .chat-area {
+    padding:
+      15px 10px;
+  }
+
+  .quick-actions {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+
+  .input-section {
+    padding-left: 10px;
+    padding-right: 10px;
+  }
+}
