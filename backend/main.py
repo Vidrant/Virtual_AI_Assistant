@@ -57,8 +57,10 @@ app = FastAPI(
 # CORS
 # ============================================================
 
+# Browsers send their address without a trailing "/", so remove any
+# "/" typed at the end of a setting, or it would never match
 frontend_origins = [
-    origin.strip()
+    origin.strip().rstrip("/")
     for origin in os.getenv(
         "FRONTEND_ORIGINS",
         "http://localhost:5173,http://127.0.0.1:5173",
